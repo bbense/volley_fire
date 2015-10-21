@@ -1,2 +1,19 @@
-# volley_fire
-Elixir Module to Implement Rolling Volley Task firing. 
+# VolleyFire
+
+**TODO: Add description**
+
+## Installation
+
+If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
+
+  1. Add volley_fire to your list of dependencies in `mix.exs`:
+
+        def deps do
+          [{:volley_fire, "~> 0.0.1"}]
+        end
+
+  2. Ensure volley_fire is started before your application:
+
+        def application do
+          [applications: [:volley_fire]]
+        end
