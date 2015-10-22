@@ -13,8 +13,8 @@ defmodule VolleyFire do
   Keep count tasks active from the list.
 
   """
-  def roll(task_list, count) do
-    pid_list = start_all(task_list)
+  def roll(function_list, count) do
+    pid_list = wait_start(function_list)
     {start_now, rolling} = Enum.split(pid_list, count)
     Enum.map(start_now, &start(&1))
     await(start_now, rolling)
@@ -24,40 +24,31 @@ defmodule VolleyFire do
     send pid, :start
   end
 
-  def start_all(task_list) do
-    Enum.map(task_list, &wait_start(&1))
+  def start(task_list) when is_list(task_list) do
+    Enum.map(task_list,fn(task) -> start(task) end )
+  end 
+
+  def wait_start(function_list) when is_list(function_list) do
+    Enum.map(function_list, &wait_start(&1))
   end
 
-  def wait_start(task) do
-    wait_and_start = fn ->
+  def wait_start(function) do
+    Task.async(fn ->
       receive do
-        :start -> task.()
+        :start -> function.()
       end
-    end
-    Task.async(wait_and_start)
+    end)
   end
 
-  # Be careful, this will receive all messages sent
-  # to this process. It will return the first task
-  # reply and the list of tasks that came second.
   def await(tasks,[]) do
     tasks
   end
 
   def await(tasks, rolling) do
-    receive do
-      message ->
-        case Task.find(tasks, message) do
-          {_ , task} ->
-            List.delete(tasks, task)
-            [first | rest ] = rolling
-            start(first)
-            await(tasks ++ first, rest)
-        nil ->
-          await(tasks, rolling)
-        end
-    end
+     still_running = Enum.filter(tasks, fn(task) -> is_nil(Task.yield(task,0)) end)
+     {to_start, rest} = Enum.split(rolling, Enum.count(tasks) - Enum.count(still_running) ) 
+     start(to_start) 
+     await(still_running ++ to_start, rest)
   end
-
 
 end
