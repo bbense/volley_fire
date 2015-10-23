@@ -1,19 +1,26 @@
 # VolleyFire
 
-**TODO: Add description**
+**A self scheduling task runner**
 
-## Installation
+This module provides a self-scheduling task runner.
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
+  There are two main functions:
 
-  1. Add volley_fire to your list of dependencies in `mix.exs`:
+  *** roll ***
 
-        def deps do
-          [{:volley_fire, "~> 0.0.1"}]
-        end
+  The idea is to start all the tasks on the list in
+  a wrapper that waits to receive a :fire message.
+  The controller sends out count :fire messages and
+  when any of those tasks is finished it sends a :fire
+  message to the next task on the list. There's no evidence
+  that doing it this way makes much sense, but it
+  was fun to write and shows what is possible on the BEAM.
 
-  2. Ensure volley_fire is started before your application:
+  *** rank ***
 
-        def application do
-          [applications: [:volley_fire]]
-        end
+  Does the same thing, but only calls Task.async
+  when new slots are available. No :fire messages
+  are required.
+
+
+
